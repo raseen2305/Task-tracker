@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "postgresql_15"]
+nixPkgs = ["nodejs_20"]
 
 [phases.install]
 cmds = [
@@ -10,7 +10,7 @@ cmds = [
 [phases.build]
 cmds = [
   "cd frontend && npm run build",
-  "cd backend && npx prisma generate"
+  "cd backend && DATABASE_URL=postgresql://placeholder:placeholder@localhost/placeholder npx prisma generate"
 ]
 
 [start]
