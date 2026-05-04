@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CEO
+  HR
+  PROJECT_LEAD
+  QUALITY_REVIEWER
+  TAKER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  REJECTED
+  OVERDUE
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  role          Role
+  avatarUrl     String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  ledProjects        Project[]       @relation("ProjectLead")
+  reviewedProjects   Project[]       @relation("ProjectQR")
+  projectMemberships ProjectMember[]
+  tasks              Task[]          @relation("TaskTaker")
+  reviewedTasks      Task[]          @relation("TaskReviewer")
+  feedbacks          Feedback[]
+  qrBatches          Batch[]         @relation("BatchQR")
+  batchMemberships   BatchMember[]
+
+  @@map("users")
+}
+
+model Project {
+  id              String        @id @default(cuid())
+  name            String
+  description     String?
+  status          ProjectStatus @default(ACTIVE)
+  expectedAhtSecs Int           @default(300)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  leadId    String
+  lead      User   @relation("ProjectLead", fields: [leadId], references: [id])
+  qrId      String?
+  qr        User?  @relation("ProjectQR", fields: [qrId], references: [id])
+
+  members   ProjectMember[]
+  tasks     Task[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  joinedAt  DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@map("project_members")
+}
+
+model Task {
+  id                 String     @id @default(cuid())
+  projectId          String
+  takerId            String
+  reviewerId         String?
+  status             TaskStatus @default(PENDING)
+
+  prompt             String?
+  response           String?
+
+  startedAt          DateTime?
+  submittedAt        DateTime?
+  ahtSeconds         Int?
+
+  qcScore            Float?
+  qcIssues           Json?
+  qcPassedAt         DateTime?
+
+  isOverdue          Boolean    @default(false)
+
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  project   Project   @relation(fields: [projectId], references: [id])
+  taker     User      @relation("TaskTaker", fields: [takerId], references: [id])
+  reviewer  User?     @relation("TaskReviewer", fields: [reviewerId], references: [id])
+  feedback  Feedback?
+
+  @@map("tasks")
+}
+
+model Batch {
+  id        String   @id @default(cuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  qrId      String
+  qr        User     @relation("BatchQR", fields: [qrId], references: [id])
+
+  members   BatchMember[]
+
+  @@map("batches")
+}
+
+model BatchMember {
+  id        String   @id @default(cuid())
+  userId    String
+  batchId   String
+  joinedAt  DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, batchId])
+  @@map("batch_members")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  taskId    String   @unique
+  userId    String
+  comment   String
+  errorTags String[]
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("feedbacks")
+}

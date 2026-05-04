@@ -1,0 +1,20 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "postgresql_15"]
+
+[phases.install]
+cmds = [
+  "cd backend && npm ci",
+  "cd frontend && npm ci"
+]
+
+[phases.build]
+cmds = [
+  "cd frontend && npm run build",
+  "cd backend && npx prisma generate"
+]
+
+[start]
+cmd = "cd backend && npx prisma migrate deploy && node src/index.js"
+
+[variables]
+NODE_ENV = "production"
