@@ -10,7 +10,6 @@ cmds = [
 [phases.build]
 cmds = [
   "cd frontend && npm run build",
-  "cp -r frontend/dist backend/public",
   "cd backend && DATABASE_URL=postgresql://placeholder:placeholder@localhost/placeholder npx prisma generate"
 ]
 
