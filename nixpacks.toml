@@ -14,7 +14,7 @@ cmds = [
 ]
 
 [start]
-cmd = "cd backend && npx prisma migrate deploy && node src/index.js"
+cmd = "cd backend && npx prisma db push && node src/index.js"
 
 [variables]
 NODE_ENV = "production"

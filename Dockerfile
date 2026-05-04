@@ -28,4 +28,4 @@ RUN cd backend && npx prisma generate
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "cd backend && npx prisma migrate deploy && node src/index.js"]
+CMD ["sh", "-c", "cd backend && npx prisma db push && node src/index.js"]
