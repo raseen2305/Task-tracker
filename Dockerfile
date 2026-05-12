@@ -26,6 +26,6 @@ COPY --from=frontend-builder /app/frontend/dist ./backend/public
 # Generate Prisma client
 RUN cd backend && npx prisma generate
 
-EXPOSE 3001
+EXPOSE 8080
 
 CMD ["sh", "-c", "cd backend && npx prisma db push && node src/index.js"]
