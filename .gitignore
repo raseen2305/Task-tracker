@@ -1,5 +1,4 @@
 node_modules/
-dist/
 .env
 *.env.local
 .DS_Store
@@ -8,4 +7,3 @@ Thumbs.db
 npm-debug.log*
 .prisma/
 prisma/migrations/
-backend/public/
