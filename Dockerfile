@@ -23,8 +23,11 @@ COPY backend/ ./backend/
 # Copy built frontend into backend's public folder
 COPY --from=frontend-builder /app/frontend/dist ./backend/public
 
+# Verify frontend files were copied
+RUN ls -la /app/backend/public/ && echo "Frontend files present" || echo "WARNING: No frontend files"
+
 # Generate Prisma client
-RUN cd backend && npx prisma generate
+RUN cd backend && DATABASE_URL=postgresql://placeholder:placeholder@localhost/placeholder npx prisma generate
 
 EXPOSE 8080
 
